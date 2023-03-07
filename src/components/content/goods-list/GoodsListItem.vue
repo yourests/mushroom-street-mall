@@ -1,6 +1,6 @@
 <template>
-  <div class="goods-list-item">
-    <img :src="goodsItem.show.img" alt="" @load="imageLoad">
+  <div class="goods-list-item" @click="goodsListItemClick(goodsItem)">
+    <img :src="showImage" alt="" @load="imageLoad">
     <div class="goods-list-item-info">
       <p>{{ goodsItem.title }}</p>
       <span class="goods-list-item-price">{{ goodsItem.price }}</span>
@@ -26,6 +26,14 @@ export default {
     imageLoad() {
       // 每次图片加载完成后，通过 eventBus 调用 bScroll 的 refresh() 重新计算可滚动区域（bScroll.scrollerHeight）
       Bus.$emit('itemImageLoaded')
+    },
+    goodsListItemClick(goodsItem) {
+      this.$router.push('/detail/' + goodsItem.iid)
+    }
+  },
+  computed: {
+    showImage() {
+      return this.goodsItem.show?.img || this.goodsItem.image
     }
   }
 }

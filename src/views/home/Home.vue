@@ -31,7 +31,7 @@ import Bus from 'components/common/mitt/Bus'
 import GoodsList from 'components/content/goods-list/GoodsList'
 
 import { getHomeMultiData, getHomeData } from 'network/home'
-import { debounce } from 'common/Utils'
+import { itemImageLoadedMixin } from 'common/Mixins'
 
 export default {
   name: "Home",
@@ -45,10 +45,11 @@ export default {
         sell: { page: 0, list: [] }
       },
       currentType: 'pop',
-      isShowBackTop: false,
+      // isShowBackTop: false,
       tabControlOffsetTop: 0,
       isTabContrlFixed: false,
-      offsetYWhenLeaving: 0
+      saveY: 0,
+      // imageLoadedListener: null
     }
   },
   components: {
@@ -61,6 +62,7 @@ export default {
     BackTop,
     GoodsList
   },
+  mixins: [itemImageLoadedMixin],
   created() {
     console.log('Home created.');
     // 请求 "/home/multidata"
@@ -72,25 +74,33 @@ export default {
     this.getHomeData('sell')
   },
   mounted() {
+    // 封装到 Mixins.js 中
     // this.$refs.scroll 切换页面后重新进入为 null, 理论上 keep-alive 可解决, 但不符合实际应用
     // debounce 为封装的防抖函数
-    const refresh = debounce(this.$refs.scroll?.refresh, 100)
-    // this.$refs.tabControl.$el.offsetTop
+    // const refresh = debounce(this.$refs.scroll?.refresh, 100)
+    // this.imageLoadedListener = () => {
+    //   console.log(111)
+    //   refresh()
+    // }
     // 监听图片加载完成事件
-    Bus.$on('itemImageLoaded', () => {
-      refresh()
-    })
+    // Bus.$on('itemImageLoaded', this.imageLoadedListener)
   },
   activated() {
     // 激活页面时滚动到上次离开时的位置
-    console.log(this.offsetYWhenLeaving);
+    console.log('saveY: ' + this.saveY);
     // 每次重新进入页面刷新一次避免返回顶部的bug（切换页面后未知原因触发上拉加载更多事件，因此要重新计算可滚动区域）
     this.$refs.scroll.refresh() // 必须在滚动之前刷新
-    this.$refs.scroll.scrollTo(0, this.offsetYWhenLeaving, 0)
+    this.$refs.scroll.scrollTo(0, this.saveY, 0)
+    // 重新监听home页面的图片加载完成事件（第一次进入home页面跳过避免重复监听）
+    if (Bus.$all.get('itemImageLoaded')?.length == 0) {
+      Bus.$on('itemImageLoaded', this.imageLoadedListener)
+    }
   },
   deactivated() {
     // 离开页面时记录当前滚动Y坐标
-    this.offsetYWhenLeaving = this.$refs.scroll.getScrollY()
+    this.saveY = this.$refs.scroll.getScrollY()
+    // 取消监听home页面的图片加载完成事件
+    Bus.$off('itemImageLoaded')
   },
   methods: {
     getHomeMultiData() {
@@ -121,9 +131,9 @@ export default {
       this.$refs.tabControl.currentIndex = this.$refs.tabControlTop.currentIndex = index
     },
     // 返回顶部事件
-    backTopClick() {
-      this.$refs.scroll.scrollTo(0, 0)
-    },
+    // backTopClick() {
+    //   this.$refs.scroll.scrollTo(0, 0)
+    // },
     // bScroll 滚动事件
     scroll(position) {
       // BackTop 组件是否显示
@@ -142,7 +152,7 @@ export default {
     },
     // 上拉加载更多事件
     loadMore() {
-      console.log('loading...');
+      console.log('loading more...');
       this.getHomeData(this.currentType)
     },
     // 轮播图第一张图片加载完成后刷新 TabControl offsetTop
@@ -189,12 +199,10 @@ export default {
 
 .content {
   /* height: calc(100%;) */
-  overflow: hidden;
-
   position: absolute;
   top: 44px;
   bottom: 49px;
-
+  overflow: hidden;
   /* background-color: #fff; */
 }
 </style>

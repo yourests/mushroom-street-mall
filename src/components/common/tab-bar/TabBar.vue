@@ -21,6 +21,6 @@ export default {
   background-color: #f0f0f0;
   box-shadow: 0 -2px 2px rgba(100, 100, 100, 0.2);
 
-  z-index: 9999;
+  z-index: 10;
 }
 </style>
