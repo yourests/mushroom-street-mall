@@ -9,9 +9,8 @@
       <detail-param-info :param-info="paramInfo" ref="detailParamInfo" />
       <detail-comment-info :comment-info="commentInfo" ref="detailCommentInfo" />
       <goods-list :goods="recommends" ref="detailRecommends" />
-      <h2>Detail Page</h2>
-      <h2>{{ iid }}</h2>
     </scroll>
+    <detail-bottom-bar @addCart="addCart" />
     <back-top @click="backTopClick" v-show="isShowBackTop" />
   </div>
 </template>
@@ -24,14 +23,15 @@ import DetailShopInfo from './child-comps/DetailShopInfo'
 import DetailImagesInfo from './child-comps/DetailImagesInfo'
 import DetailParamInfo from './child-comps/DetailParamInfo'
 import DetailCommentInfo from './child-comps/DetailCommentInfo'
+import DetailBottomBar from './child-comps/DetailBottomBar'
 
 import Scroll from 'components/common/scroll/Scroll'
-import BackTop from 'components/common/back-top/BackTop'
+
 import Bus from 'components/common/mitt/Bus'
 import GoodsList from 'components/content/goods-list/GoodsList'
 
 import { getDetailByIid, getRecommend, GoodsDetail, ShopDetail, GoodsParam } from 'network/detail'
-import { itemImageLoadedMixin } from 'common/Mixins'
+import { itemImageLoadedMixin, backTopMixin } from 'common/Mixins'
 
 export default {
   name: 'Detail',
@@ -57,7 +57,7 @@ export default {
     // 根据iid获取详情数据
     getDetailByIid(this.iid).then(res => {
       const result = res.result
-      console.log(result)
+      console.log('result: ', result)
       // 获取图片轮播数据
       this.topImages = result.itemInfo.topImages
       // 获取商品数据
@@ -117,31 +117,28 @@ export default {
     DetailImagesInfo,
     DetailParamInfo,
     DetailCommentInfo,
+    DetailBottomBar,
     Scroll,
-    BackTop,
     Bus,
     GoodsList
   },
-  mixins: [itemImageLoadedMixin],
+  mixins: [itemImageLoadedMixin, backTopMixin],
   methods: {
     imgLoad() {
       this.$refs.scroll.refresh()
+      // 多次调用前清空数组
       this.sectionOffsetTops = []
       this.sectionOffsetTops.push(0)
       this.sectionOffsetTops.push(this.$refs.detailParamInfo.$el.offsetTop - 44)
       this.sectionOffsetTops.push(this.$refs.detailCommentInfo.$el.offsetTop - 44)
       this.sectionOffsetTops.push(this.$refs.detailRecommends.$el.offsetTop - 44)
-      console.log(this.sectionOffsetTops);
     },
     scroll(position) {
+      // 获取实时滚动位置
       let currentOffsetTop = Math.abs(position.y)
       // BackTop 组件是否显示
-      if ((currentOffsetTop > 1000) && (this.isShowBackTop == false)) {
-        this.isShowBackTop = true
-      } else if ((currentOffsetTop <= 1000) && (this.isShowBackTop == true)) {
-        this.isShowBackTop = false
-      }
-      // 导航栏随滚动切换
+      this.listenShowBackTop(currentOffsetTop)
+      // 导航栏选中随滚动自动切换
       for (let [k, v] of this.sectionOffsetTops.entries()) {
         if (k < this.sectionOffsetTops.length - 1) {
           if ((currentOffsetTop >= this.sectionOffsetTops[k]) && (currentOffsetTop < this.sectionOffsetTops[k + 1]) && (this.$refs.detailNavBar.currentIndex !== k)) {
@@ -165,6 +162,17 @@ export default {
     },
     navBarClick(index) {
       this.$refs.scroll.scrollTo(0, -this.sectionOffsetTops[index])
+    },
+    addCart() {
+      // 添加到购物车中的信息
+      const obj = {
+        image: this.topImages[0],
+        title: this.goodsDetail.title,
+        desc: this.goodsDetail.desc,
+        price: this.goodsDetail.realPrice,
+        iid: this.iid
+      }
+      this.$store.dispatch('addCart', obj)
     }
   }
 }
@@ -189,7 +197,7 @@ export default {
   top: 44px;
   bottom: 0;
   overflow: hidden; */
-  height: calc(100% - 44px);
+  height: calc(100% - 44px - 58px);
   overflow: hidden;
 
 }

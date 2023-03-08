@@ -26,12 +26,11 @@ import HomePopular from './child-comps/HomePopular'
 import NavBar from 'components/common/nav-bar/NavBar'
 import TabControl from 'components/common/tab-control/TabControl'
 import Scroll from 'components/common/scroll/Scroll'
-import BackTop from 'components/common/back-top/BackTop'
 import Bus from 'components/common/mitt/Bus'
 import GoodsList from 'components/content/goods-list/GoodsList'
 
 import { getHomeMultiData, getHomeData } from 'network/home'
-import { itemImageLoadedMixin } from 'common/Mixins'
+import { itemImageLoadedMixin, backTopMixin } from 'common/Mixins'
 
 export default {
   name: "Home",
@@ -59,10 +58,9 @@ export default {
     NavBar,
     TabControl,
     Scroll,
-    BackTop,
     GoodsList
   },
-  mixins: [itemImageLoadedMixin],
+  mixins: [itemImageLoadedMixin, backTopMixin],
   created() {
     console.log('Home created.');
     // 请求 "/home/multidata"
@@ -130,26 +128,20 @@ export default {
       // 让两个TabControl组件中currentIndex保持一致
       this.$refs.tabControl.currentIndex = this.$refs.tabControlTop.currentIndex = index
     },
-    // 返回顶部事件
-    // backTopClick() {
-    //   this.$refs.scroll.scrollTo(0, 0)
-    // },
     // bScroll 滚动事件
     scroll(position) {
+      // 获取实时滚动位置
+      let currentOffsetTop = Math.abs(position.y)
       // BackTop 组件是否显示
-      if ((Math.abs(position.y) > 1000) && (this.isShowBackTop == false)) {
-        this.isShowBackTop = true
-      } else if ((Math.abs(position.y) <= 1000) && (this.isShowBackTop == true)) {
-        this.isShowBackTop = false
-      }
-      // TabControl 组件的吸顶(position: fixed)
-      // console.log(this.tabControlOffsetTop)
-      if ((Math.abs(position.y) >= this.tabControlOffsetTop) && (this.isTabContrlFixed == false)) {
+      this.listenShowBackTop(currentOffsetTop)
+      // TabControl 组件的吸顶
+      if ((currentOffsetTop >= this.tabControlOffsetTop) && (this.isTabContrlFixed == false)) {
         this.isTabContrlFixed = true
-      } else if ((Math.abs(position.y) < this.tabControlOffsetTop) && (this.isTabContrlFixed == true)) {
+      } else if ((currentOffsetTop < this.tabControlOffsetTop) && (this.isTabContrlFixed == true)) {
         this.isTabContrlFixed = false
       }
     },
+
     // 上拉加载更多事件
     loadMore() {
       console.log('loading more...');

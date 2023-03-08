@@ -1,11 +1,14 @@
+import BackTop from 'components/common/back-top/BackTop'
+
 import Bus from 'components/common/mitt/Bus'
+
 import { debounce } from 'common/Utils'
+import { BACK_POSITION } from 'common/Constant'
 
 export const itemImageLoadedMixin = {
   data() {
     return {
       imageLoadedListener: null,
-      isShowBackTop: false
     }
   },
   mounted() {
@@ -19,20 +22,29 @@ export const itemImageLoadedMixin = {
     }
     // 监听图片加载完成事件
     Bus.$on('itemImageLoaded', this.imageLoadedListener)
+  }
+}
+
+export const backTopMixin = {
+  data() {
+    return {
+      isShowBackTop: false
+    }
+  },
+  components: {
+    BackTop
   },
   methods: {
     // 返回顶部事件
     backTopClick() {
       this.$refs.scroll.scrollTo(0, 0)
     },
-    scroll(position) {
-      // BackTop 组件是否显示
-      console.log(2);
-      // if ((Math.abs(position.y) > 1000) && (this.isShowBackTop == false)) {
-      //   this.isShowBackTop = true
-      // } else if ((Math.abs(position.y) <= 1000) && (this.isShowBackTop == true)) {
-      //   this.isShowBackTop = false
-      // }
-    }
+    listenShowBackTop(currentOffsetTop) {
+      if ((currentOffsetTop > BACK_POSITION) && (this.isShowBackTop == false)) {
+        this.isShowBackTop = true
+      } else if ((currentOffsetTop <= BACK_POSITION) && (this.isShowBackTop == true)) {
+        this.isShowBackTop = false
+      }
+    },
   }
 }
