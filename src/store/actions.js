@@ -12,6 +12,7 @@ export default {
       commit(ADD_COUNTER, i)
     } else {
       payload.count = 1
+      payload.checked = true
       commit(ADD_NEW_PRODUCT, payload)
     }
   }

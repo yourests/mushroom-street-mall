@@ -1,16 +1,26 @@
 <template>
   <div id="detail">
+    <!-- 详情导航栏 -->
     <detail-nav-bar class="detail-nav-bar" @navBarClick="navBarClick" ref="detailNavBar" />
     <scroll class="content" ref="scroll" :probe-type="3" :pull-up-load="false" @scroll="scroll">
+      <!-- 详情轮播图 -->
       <detail-swiper :top-images="topImages" />
+      <!-- 详情基本信息 -->
       <detail-base-info :goods-detail="goodsDetail" />
+      <!-- 详情店铺信息 -->
       <detail-shop-info :shop-detail="shopDetail" />
+      <!-- 详情图片信息 -->
       <detail-images-info :images-info="detailInfo" @imgLoad="imgLoad" />
+      <!-- 详情参数信息 -->
       <detail-param-info :param-info="paramInfo" ref="detailParamInfo" />
+      <!-- 详情评论信息 -->
       <detail-comment-info :comment-info="commentInfo" ref="detailCommentInfo" />
+      <!-- 详情推荐信息 -->
       <goods-list :goods="recommends" ref="detailRecommends" />
     </scroll>
+    <!-- 详情底部 -->
     <detail-bottom-bar @addCart="addCart" />
+    <!-- 返回顶部 -->
     <back-top @click="backTopClick" v-show="isShowBackTop" />
   </div>
 </template>
@@ -26,7 +36,6 @@ import DetailCommentInfo from './child-comps/DetailCommentInfo'
 import DetailBottomBar from './child-comps/DetailBottomBar'
 
 import Scroll from 'components/common/scroll/Scroll'
-
 import Bus from 'components/common/mitt/Bus'
 import GoodsList from 'components/content/goods-list/GoodsList'
 

@@ -1,19 +1,27 @@
 <template>
   <div id="home">
+    <!-- 导航栏 -->
     <nav-bar class="home-nav">
       <template v-slot:nav-bar-center>
         <div>购物街</div>
       </template>
     </nav-bar>
+    <!-- 头部选项卡 -->
     <tab-control class="tabControl-Top" ref="tabControlTop" :titles="['流行', '新款', '精选']" @tabClick="tabClick"
       v-show="isTabContrlFixed" />
     <scroll class="content" ref="scroll" :probe-type="3" :pull-up-load="true" @scroll="scroll" @pulling-up="loadMore">
+      <!-- 首页轮播图 -->
       <home-swiper :banners="banners" @swiper-image-loaded="swiperImageLoaded" />
+      <!-- 首页推荐 -->
       <home-recommend :recommends="recommends" />
+      <!-- 首页本周流行 -->
       <home-popular />
+      <!-- 中间选项卡 -->
       <tab-control ref="tabControl" :titles="['流行', '新款', '精选']" @tabClick="tabClick" />
+      <!-- 商品列表 -->
       <goods-list :goods="getGoodsByType" />
     </scroll>
+    <!-- 返回顶部 -->
     <back-top @click="backTopClick" v-show="isShowBackTop" />
   </div>
 </template>

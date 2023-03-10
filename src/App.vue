@@ -3,7 +3,7 @@
     <router-view></router-view>
   </keep-alive> -->
   <router-view v-slot="{ Component }">
-    <keep-alive exclude="Detail">
+    <keep-alive exclude="Detail,ShopCart">
       <component :is="Component" />
     </keep-alive>
   </router-view>

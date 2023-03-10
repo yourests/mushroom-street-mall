@@ -1,2 +1,5 @@
 export const ADD_COUNTER = 'addCounter'
 export const ADD_NEW_PRODUCT = 'addNewProduct'
+export const CHANGE_CHECKED = 'changeChecked'
+export const SELECT_NONE = 'selectNone'
+export const SELECT_ALL = 'selectAll'
