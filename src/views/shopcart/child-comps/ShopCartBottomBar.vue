@@ -10,21 +10,30 @@
       <span>合计:{{ totalPrice }}</span>
     </div>
     <!-- 结算 -->
-    <div class="calculate">
+    <div class="calculate" @click="calcClick">
       <span>去结算 ({{ checkedCount }})</span>
     </div>
+    <toast :message="toastMessage" :is-show="toastShow" />
   </div>
 </template>
 
 <script>
 import CheckButton from 'components/content/check-button/CheckButton'
 import { SELECT_NONE, SELECT_ALL } from 'store/mutation-types'
+import Toast from 'components/common/toast/Toast'
 import { mapGetters } from 'vuex'
 
 export default {
   name: 'ShopCartBottomBar',
+  data() {
+    return {
+      toastMessage: '',
+      toastShow: false
+    }
+  },
   components: {
-    CheckButton
+    CheckButton,
+    Toast
   },
   computed: {
     ...mapGetters(['totalPrice', 'checkedCount', 'isSelectAll'])
@@ -36,6 +45,18 @@ export default {
       } else {  // 非全选状态 → 全选
         this.$store.commit(SELECT_ALL)
       }
+    },
+    calcClick() {
+      if (!this.checkedCount) {
+        this.toastMessage = '请选择购买的商品'
+      } else {
+        this.toastMessage = '购买成功'
+      }
+      this.toastShow = true
+      setTimeout(() => {
+        this.toastMessage = ''
+        this.toastShow = false
+      }, 1500)
     }
   }
 }

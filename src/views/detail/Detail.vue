@@ -22,6 +22,7 @@
     <detail-bottom-bar @addCart="addCart" />
     <!-- 返回顶部 -->
     <back-top @click="backTopClick" v-show="isShowBackTop" />
+    <toast :message="toastMessage" :is-show="toastShow" />
   </div>
 </template>
 
@@ -37,10 +38,13 @@ import DetailBottomBar from './child-comps/DetailBottomBar'
 
 import Scroll from 'components/common/scroll/Scroll'
 import Bus from 'components/common/mitt/Bus'
+import Toast from 'components/common/toast/Toast'
 import GoodsList from 'components/content/goods-list/GoodsList'
 
 import { getDetailByIid, getRecommend, GoodsDetail, ShopDetail, GoodsParam } from 'network/detail'
 import { itemImageLoadedMixin, backTopMixin } from 'common/Mixins'
+
+import { mapActions } from 'vuex'
 
 export default {
   name: 'Detail',
@@ -54,7 +58,9 @@ export default {
       paramInfo: {},
       commentInfo: {},
       recommends: [],
-      sectionOffsetTops: []
+      sectionOffsetTops: [],
+      toastMessage: '',
+      toastShow: false
       // isShowBackTop: false,
       // imageLoadedListener: null
     }
@@ -129,10 +135,13 @@ export default {
     DetailBottomBar,
     Scroll,
     Bus,
+    Toast,
     GoodsList
   },
   mixins: [itemImageLoadedMixin, backTopMixin],
   methods: {
+    // 将 store 中的 actions 映射到局部方法
+    ...mapActions(['addToCart']),
     imgLoad() {
       this.$refs.scroll.refresh()
       // 多次调用前清空数组
@@ -174,14 +183,24 @@ export default {
     },
     addCart() {
       // 添加到购物车中的信息
-      const obj = {
+      const product = {
         image: this.topImages[0],
         title: this.goodsDetail.title,
         desc: this.goodsDetail.desc,
         price: this.goodsDetail.realPrice,
         iid: this.iid
       }
-      this.$store.dispatch('addCart', obj)
+      // this.$store.dispatch('addToCart', product).then(res => {
+      //   console.log(res)
+      // })
+      this.addToCart(product).then(res => {
+        this.toastMessage = res
+        this.toastShow = true
+        setTimeout(() => {
+          this.toastMessage = ''
+          this.toastShow = false
+        }, 1500)
+      })
     }
   }
 }
